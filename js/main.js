@@ -1,8 +1,8 @@
 
-        // CONFIGURACIÓN: Cambia esto por el número total de tus imágenes y la ruta
-        const totalPages = 136; // <--- AJUSTA ESTE NÚMERO
-        const imagePath = 'img/paginas/'; // <--- AJUSTA LA RUTA DE TUS IMÁGENES
-        const imagePrefix = 'catalogo-'; // Ejemplo: pagina_1.webp, pagina_2.webp...
+        // CONFIGURACIÓN: imágenes y la ruta.
+        const totalPages = 136; // AJUSTA ESTE NÚMERO.
+        const imagePath = 'img/paginas/'; // RUTA IMÁGENES.
+        const imagePrefix = 'catalogo-'; // prefijo nombre imagen antes del numero.
         
         let pageFlip;
         let zoomLevel = 1;
@@ -240,7 +240,7 @@
             else if (zoomLevel === 2) zoomLevel = 2.5;
             else return;
 
-            // Al hacer zoom, mantenemos la traslación actual o la reseteamos si prefieres
+            // Al hacer zoom, mantenemos la traslación actual o la reseteamos
             // Para una mejor UX, si estaba en 1 y pasa a 1.5, centramos
             if (zoomLevel === 1.5) {
                 translateX = 0;
