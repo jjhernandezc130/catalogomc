@@ -254,5 +254,45 @@
             updateZoomButtonStates();
         }
 
-        // Iniciar carga al cargar la ventana
-        window.onload = loadBook;
+        
+// Iniciar carga al cargar la ventana
+window.onload = loadBook;
+
+// Función para forzar descarga binaria
+async function downloadCatalog(e) {
+    e.preventDefault();
+    const button = e.currentTarget;
+    const originalText = button.innerText;
+    
+    try {
+        button.innerText = 'Descargando...';
+        button.style.pointerEvents = 'none';
+
+        const response = await fetch('catalogo.pdf');
+        if (!response.ok) throw new Error('Error de red');
+        
+        const blob = await response.blob();
+        // Crear un nuevo blob forzando el tipo binario genérico para evitar que el navegador lo reconozca como PDF visualizable
+        const newBlob = new Blob([blob], { type: 'application/octet-stream' });
+        
+        const url = window.URL.createObjectURL(newBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'catalogo.pdf';
+        
+        document.body.appendChild(a);
+        a.click();
+        
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+    } catch (error) {
+        console.error('Fallo la descarga programática:', error);
+        // Fallback: intentar descarga directa si falla el fetch
+        window.location.href = 'catalogo.pdf';
+    } finally {
+        button.innerText = originalText;
+        button.style.pointerEvents = 'auto';
+    }
+}
