@@ -6,6 +6,9 @@
         
         let pageFlip;
         let zoomLevel = 1;
+        let isDragging = false;
+        let startX, startY;
+        let translateX = 0, translateY = 0;
 
         // Cargar el catálogo con imágenes
         async function loadBook() {
@@ -44,11 +47,70 @@
 
                 // Inicializar el flipbook con el ratio detectado
                 initFlipBook(imgAspectRatio);
+                
+                // Inicializar eventos de arrastre para el zoom
+                initDragEvents();
 
             } catch (error) {
                 console.error('Error al cargar las imágenes:', error);
                 document.getElementById('loader').innerHTML = `<span style="color: #ff6b6b;">Error: ${error.message}</span>`;
             }
+        }
+
+        // Inicializar eventos de arrastre (Pan)
+        function initDragEvents() {
+            const wrapper = document.querySelector('.book-wrapper');
+            const book = document.getElementById('flip-book');
+
+            wrapper.addEventListener('mousedown', (e) => {
+                if (zoomLevel > 1) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging || zoomLevel <= 1) return;
+                
+                e.preventDefault();
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                
+                updateTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Soporte para touch (móviles)
+            wrapper.addEventListener('touchstart', (e) => {
+                if (zoomLevel > 1) {
+                    isDragging = true;
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                }
+            }, { passive: false });
+
+            wrapper.addEventListener('touchmove', (e) => {
+                if (!isDragging || zoomLevel <= 1) return;
+                
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                
+                updateTransform();
+            }, { passive: false });
+
+            wrapper.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        function updateTransform() {
+            const book = document.getElementById('flip-book');
+            // Aplicar escala y traslación
+            book.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
         }
 
         // Función para obtener dimensiones de imagen
@@ -161,10 +223,11 @@
 
         function resetZoom() {
             if (zoomLevel <= 1) return;
-            const book = document.getElementById('flip-book');
             zoomLevel = 1;
-            book.style.transform = `scale(${zoomLevel})`;
-            book.style.transformOrigin = 'center center';
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+            
             const pageInfo = document.getElementById('page-count');
             pageInfo.innerText = `Zoom: 100%`;
             setTimeout(() => updatePageInfo(), 1000);
@@ -172,14 +235,19 @@
         }
 
         function toggleZoom() {
-            const book = document.getElementById('flip-book');
             if (zoomLevel === 1) zoomLevel = 1.5;
             else if (zoomLevel === 1.5) zoomLevel = 2;
             else if (zoomLevel === 2) zoomLevel = 2.5;
             else return;
 
-            book.style.transform = `scale(${zoomLevel})`;
-            book.style.transformOrigin = 'center center';
+            // Al hacer zoom, mantenemos la traslación actual o la reseteamos si prefieres
+            // Para una mejor UX, si estaba en 1 y pasa a 1.5, centramos
+            if (zoomLevel === 1.5) {
+                translateX = 0;
+                translateY = 0;
+            }
+            
+            updateTransform();
             const pageInfo = document.getElementById('page-count');
             pageInfo.innerText = `Zoom: ${Math.round(zoomLevel * 100)}%`;
             setTimeout(() => updatePageInfo(), 1000);

@@ -21,9 +21,13 @@ html {
     justify-content: center;
     align-items: center;
     padding: 0;
-    /* Sin padding - 100% de uso de pantalla */
     box-sizing: border-box;
     overflow: hidden;
+    cursor: grab;
+}
+
+.book-wrapper:active {
+    cursor: grabbing;
 }
 
 /* El elemento libro */
@@ -31,6 +35,8 @@ html {
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
     display: none;
     background-size: cover;
+    transition: transform 0.1s ease-out; /* Transición suave para el movimiento */
+    will-change: transform;
 }
 
 /* Cada página del libro */
